@@ -18,6 +18,7 @@ class _SignupScreenState extends State<SignupScreen> {
   final _confirmPasswordController = TextEditingController();
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
+  String _selectedRole = 'student'; // Default role
 
   @override
   void dispose() {
@@ -35,6 +36,7 @@ class _SignupScreenState extends State<SignupScreen> {
         _nameController.text.trim(),
         _emailController.text.trim(),
         _passwordController.text,
+        role: _selectedRole,
       );
 
       if (success && mounted) {
@@ -188,6 +190,58 @@ class _SignupScreenState extends State<SignupScreen> {
                             return null;
                           },
                         ),
+                        const SizedBox(height: 24),
+                        // Role Selection
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Colors.grey[100],
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: Colors.grey[300]!),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'I want to register as:',
+                                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: RadioListTile<String>(
+                                      title: const Text('Student'),
+                                      subtitle: const Text('Find tutors'),
+                                      value: 'student',
+                                      groupValue: _selectedRole,
+                                      onChanged: (value) {
+                                        setState(() {
+                                          _selectedRole = value!;
+                                        });
+                                      },
+                                    ),
+                                  ),
+                                  Expanded(
+                                    child: RadioListTile<String>(
+                                      title: const Text('Tutor'),
+                                      subtitle: const Text('Offer tutoring'),
+                                      value: 'tutor',
+                                      groupValue: _selectedRole,
+                                      onChanged: (value) {
+                                        setState(() {
+                                          _selectedRole = value!;
+                                        });
+                                      },
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
                         const SizedBox(height: 32),
                         Consumer<UserProvider>(
                           builder: (context, userProvider, child) {
@@ -200,7 +254,10 @@ class _SignupScreenState extends State<SignupScreen> {
                               ),
                               child: userProvider.isLoading
                                   ? const CircularProgressIndicator(color: Colors.white)
-                                  : const Text('Create Account', style: TextStyle(fontSize: 16)),
+                                  : Text(
+                                      'Register as ${_selectedRole == 'tutor' ? 'Tutor' : 'Student'}',
+                                      style: const TextStyle(fontSize: 16),
+                                    ),
                             );
                           },
                         ),

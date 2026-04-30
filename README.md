@@ -50,25 +50,36 @@ lib/
 - **ApiService**: HTTP requests and data fetching
 - **StorageService**: Local data persistence with SharedPreferences
 
-## � App Distribution
+## 📱 App Distribution
 
 ### APK File
-The latest release APK is available at:
+The latest release APK (51.6 MB) is available at:
 ```
 build/app/outputs/flutter-apk/app-release.apk
 ```
+
+**APK Features:**
+- Working authentication system (register/login with email & password)
+- Role selection (Student or Tutor registration)
+- Persistent data storage (survives app restart)
+- Tutor discovery and search
+- Favorites management
+- Session requests
+- Profile management with image picker
+- Change password functionality
 
 To install:
 1. Enable "Install from Unknown Sources" in Android Settings
 2. Transfer the APK to your Android device
 3. Open the APK file and tap "Install"
+4. Register a new account or login with existing credentials
 
 ### Build from Source
 ```bash
 flutter build apk --release
 ```
 
-## �🚀 Getting Started
+## 🚀 Getting Started
 
 ### Prerequisites
 - Flutter SDK (>=3.11.1)
@@ -163,7 +174,7 @@ The app includes comprehensive mock data for development and testing. Mock data 
 ## 🔒 Security Considerations
 
 - Input validation on all forms
-- Secure password handling (mock implementation)
+- Secure password handling with local storage
 - Permission requests for camera/storage access
 - Error handling for network requests
 
@@ -178,10 +189,16 @@ The app includes comprehensive mock data for development and testing. Mock data 
 - [ ] Data persistence across app restarts
 
 ### Known Limitations
-- Mock authentication (no real backend)
-- Image upload is simulated
+- No cloud backend (uses local device storage)
+- Image upload stored locally only
 - No real-time messaging
 - Limited error recovery scenarios
+
+### ✅ Implemented Features
+- ✅ **Working Authentication**: Email/password login with persistent storage
+- ✅ **User Registration**: Students and tutors can register with role selection
+- ✅ **Password Management**: Change password functionality with verification
+- ✅ **Data Persistence**: All user data saved locally using SharedPreferences
 
 ## 🚀 Future Enhancements
 
@@ -200,7 +217,7 @@ The app includes comprehensive mock data for development and testing. Mock data 
 - Performance optimization
 - Accessibility improvements
 
-## � Group Members
+## 👥 Group Members
 
 | Name | ID |
 |------|-----|
@@ -210,8 +227,7 @@ The app includes comprehensive mock data for development and testing. Mock data 
 | [Ket Girma] | [0631/15] |
 | [Abdiweli Mohamoud] | [5206/15] |
 
-
-## �� License
+## 📄 License
 
 This project is for educational purposes. Feel free to use and modify as needed.
 

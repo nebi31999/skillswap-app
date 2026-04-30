@@ -14,6 +14,7 @@ class User {
   final List<String> languages;
   final DateTime createdAt;
   final DateTime lastActive;
+  final String role; // 'student' or 'tutor'
 
   const User({
     required this.id,
@@ -26,6 +27,7 @@ class User {
     required this.languages,
     required this.createdAt,
     required this.lastActive,
+    this.role = 'student',
   });
 
   factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
@@ -42,6 +44,7 @@ class User {
     List<String>? languages,
     DateTime? createdAt,
     DateTime? lastActive,
+    String? role,
   }) {
     return User(
       id: id ?? this.id,
@@ -54,6 +57,7 @@ class User {
       languages: languages ?? this.languages,
       createdAt: createdAt ?? this.createdAt,
       lastActive: lastActive ?? this.lastActive,
+      role: role ?? this.role,
     );
   }
 
@@ -68,6 +72,6 @@ class User {
 
   @override
   String toString() {
-    return 'User(id: $id, name: $name, email: $email, interests: $interests)';
+    return 'User(id: $id, name: $name, email: $email, role: $role, interests: $interests)';
   }
 }

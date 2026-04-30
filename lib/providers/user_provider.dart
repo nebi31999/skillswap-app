@@ -65,7 +65,7 @@ class UserProvider extends ChangeNotifier {
   }
 
   // Register user with proper validation
-  Future<bool> register(String name, String email, String password) async {
+  Future<bool> register(String name, String email, String password, {String role = 'student'}) async {
     _setLoading(true);
     try {
       await Future.delayed(const Duration(seconds: 1));
@@ -88,6 +88,7 @@ class UserProvider extends ChangeNotifier {
           languages: ['English'],
           createdAt: DateTime.now(),
           lastActive: DateTime.now(),
+          role: role,
         );
         
         final success = await StorageService.registerUser(_user!, password);
