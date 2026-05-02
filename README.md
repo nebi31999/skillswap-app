@@ -2,6 +2,10 @@
 
 A comprehensive Flutter mobile application that connects students with peer tutors for skill sharing and learning sessions.
 
+## 🎥 App Demonstration
+
+Watch the complete app demonstration: [SkillSwap App Demo](https://www.loom.com/share/f5ec247ee96849b78edf18728a4c9530)
+
 ## 📱 Features
 
 ### Core Functionality

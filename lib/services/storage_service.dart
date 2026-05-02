@@ -8,6 +8,7 @@ class StorageService {
   static const String _userKey = 'current_user';
   static const String _onboardingKey = 'onboarding_completed';
   static const String _registeredUsersKey = 'registered_users';
+  static const String _userTutorsKey = 'user_tutors';
 
   // Save registered user with password
   static Future<bool> registerUser(User user, String password) async {
@@ -33,6 +34,12 @@ class StorageService {
       
       await prefs.setString(_registeredUsersKey, jsonEncode(users));
       await prefs.setString(_userKey, jsonEncode(user.toJson()));
+      
+      // If user can teach, also save them as a tutor
+      if (user.canTeach) {
+        await saveUserAsTutor(user);
+      }
+      
       return true;
     } catch (e) {
       throw Exception('Failed to register user: $e');
@@ -231,6 +238,69 @@ class StorageService {
       await prefs.clear();
     } catch (e) {
       throw Exception('Failed to clear all data: $e');
+    }
+  }
+
+  // Save user as tutor (when user registers as tutor or both)
+  static Future<void> saveUserAsTutor(User user) async {
+    try {
+      if (!user.canTeach) return; // Only save if user can teach
+      
+      final prefs = await SharedPreferences.getInstance();
+      final userTutorsJson = prefs.getString(_userTutorsKey);
+      Map<String, dynamic> userTutors = {};
+      
+      if (userTutorsJson != null) {
+        userTutors = Map<String, dynamic>.from(jsonDecode(userTutorsJson));
+      }
+      
+      // Store user as tutor
+      userTutors[user.id] = user.toJson();
+      
+      await prefs.setString(_userTutorsKey, jsonEncode(userTutors));
+    } catch (e) {
+      throw Exception('Failed to save user as tutor: $e');
+    }
+  }
+
+  // Get all user-created tutors
+  static Future<List<Tutor>> getUserTutors() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final userTutorsJson = prefs.getString(_userTutorsKey);
+      
+      if (userTutorsJson == null) return [];
+      
+      final userTutors = Map<String, dynamic>.from(jsonDecode(userTutorsJson));
+      
+      return userTutors.values.map((userJson) {
+        final user = User.fromJson(Map<String, dynamic>.from(userJson));
+        return user.toTutor();
+      }).toList();
+    } catch (e) {
+      return [];
+    }
+  }
+
+  // Update user tutor info
+  static Future<void> updateUserTutorInfo(User user) async {
+    try {
+      if (!user.canTeach) {
+        // Remove from tutors if they can't teach anymore
+        final prefs = await SharedPreferences.getInstance();
+        final userTutorsJson = prefs.getString(_userTutorsKey);
+        if (userTutorsJson != null) {
+          final userTutors = Map<String, dynamic>.from(jsonDecode(userTutorsJson));
+          userTutors.remove(user.id);
+          await prefs.setString(_userTutorsKey, jsonEncode(userTutors));
+        }
+        return;
+      }
+      
+      // Update tutor info
+      await saveUserAsTutor(user);
+    } catch (e) {
+      throw Exception('Failed to update user tutor info: $e');
     }
   }
 }

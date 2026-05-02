@@ -18,7 +18,7 @@ class _SignupScreenState extends State<SignupScreen> {
   final _confirmPasswordController = TextEditingController();
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
-  String _selectedRole = 'student'; // Default role
+  String _selectedRole = 'both'; // Default - everyone can teach and learn
 
   @override
   void dispose() {
@@ -203,41 +203,38 @@ class _SignupScreenState extends State<SignupScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'I want to register as:',
+                                'Join SkillSwap:',
                                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
                               const SizedBox(height: 12),
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: RadioListTile<String>(
-                                      title: const Text('Student'),
-                                      subtitle: const Text('Find tutors'),
-                                      value: 'student',
-                                      groupValue: _selectedRole,
-                                      onChanged: (value) {
-                                        setState(() {
-                                          _selectedRole = value!;
-                                        });
-                                      },
-                                    ),
+                              Container(
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(
+                                    color: Theme.of(context).primaryColor.withValues(alpha: 0.3),
                                   ),
-                                  Expanded(
-                                    child: RadioListTile<String>(
-                                      title: const Text('Tutor'),
-                                      subtitle: const Text('Offer tutoring'),
-                                      value: 'tutor',
-                                      groupValue: _selectedRole,
-                                      onChanged: (value) {
-                                        setState(() {
-                                          _selectedRole = value!;
-                                        });
-                                      },
+                                ),
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.sync_alt,
+                                      color: Theme.of(context).primaryColor,
                                     ),
-                                  ),
-                                ],
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Text(
+                                        'Teach what you know & learn what you don\'t know',
+                                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ],
                           ),
@@ -255,13 +252,12 @@ class _SignupScreenState extends State<SignupScreen> {
                               child: userProvider.isLoading
                                   ? const CircularProgressIndicator(color: Colors.white)
                                   : Text(
-                                      'Register as ${_selectedRole == 'tutor' ? 'Tutor' : 'Student'}',
+                                      _getRegisterButtonText(),
                                       style: const TextStyle(fontSize: 16),
                                     ),
                             );
                           },
                         ),
-                        const SizedBox(height: 24),
                         // Terms and Conditions
                         Text(
                           'By creating an account, you agree to our Terms of Service and Privacy Policy',
@@ -280,5 +276,9 @@ class _SignupScreenState extends State<SignupScreen> {
         ),
       ),
     );
+  }
+
+  String _getRegisterButtonText() {
+    return 'Create Account';
   }
 }

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/tutor.dart';
 import '../models/review.dart';
+import '../services/storage_service.dart';
 
 class ApiService {
   static const String baseUrl = 'https://api.skillswap.com'; // Replace with actual API URL
@@ -32,9 +33,31 @@ class ApiService {
         throw Exception('Failed to load tutors: ${response.statusCode}');
       }
     } catch (e) {
-      // Fallback to mock data if API fails
-      return _getMockTutors();
+      // Fallback to mock data + user tutors if API fails
+      return _getCombinedTutors();
     }
+  }
+
+  // Get combined list of mock tutors and user-created tutors
+  static Future<List<Tutor>> _getCombinedTutors() async {
+    final mockTutors = _getMockTutors();
+    final userTutors = await StorageService.getUserTutors();
+    
+    // Combine both lists
+    final allTutors = [...mockTutors, ...userTutors];
+    
+    // Remove duplicates (if a user tutor has same ID as mock, prefer user)
+    final uniqueTutors = <Tutor>[];
+    final seenIds = <String>{};
+    
+    for (final tutor in allTutors) {
+      if (!seenIds.contains(tutor.id)) {
+        seenIds.add(tutor.id);
+        uniqueTutors.add(tutor);
+      }
+    }
+    
+    return uniqueTutors;
   }
 
   // Fetch tutor by ID
@@ -55,9 +78,9 @@ class ApiService {
         throw Exception('Failed to load tutor: ${response.statusCode}');
       }
     } catch (e) {
-      // Fallback to mock data
-      final mockTutors = _getMockTutors();
-      final tutor = mockTutors.where((t) => t.id == tutorId).firstOrNull;
+      // Fallback to mock data + user tutors
+      final allTutors = await _getCombinedTutors();
+      final tutor = allTutors.where((t) => t.id == tutorId).firstOrNull;
       if (tutor != null) {
         return tutor;
       }

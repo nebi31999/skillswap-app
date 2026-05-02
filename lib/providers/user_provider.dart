@@ -121,6 +121,10 @@ class UserProvider extends ChangeNotifier {
     List<String>? interests,
     List<String>? languages,
     String? profileImage,
+    List<String>? teachingSkills,
+    double? hourlyRate,
+    String? tutorDescription,
+    bool? isAvailableAsTutor,
   }) async {
     if (_user == null) return false;
 
@@ -133,10 +137,20 @@ class UserProvider extends ChangeNotifier {
         interests: interests,
         languages: languages,
         profileImage: profileImage,
+        teachingSkills: teachingSkills,
+        hourlyRate: hourlyRate,
+        tutorDescription: tutorDescription,
+        isAvailableAsTutor: isAvailableAsTutor,
         lastActive: DateTime.now(),
       );
       
       await StorageService.saveUser(_user!);
+      
+      // If user can teach, update their tutor info as well
+      if (_user!.canTeach) {
+        await StorageService.updateUserTutorInfo(_user!);
+      }
+      
       _error = null;
       notifyListeners();
       return true;

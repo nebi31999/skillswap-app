@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
 import '../providers/user_provider.dart';
+import '../models/user.dart';
 import 'login_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -263,6 +264,154 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
+  void _showTutorProfileDialog(BuildContext context, User currentUser) {
+    final descriptionController = TextEditingController(text: currentUser.tutorDescription);
+    final rateController = TextEditingController(
+      text: currentUser.hourlyRate?.toString() ?? '25.0',
+    );
+    final formKey = GlobalKey<FormState>();
+    
+    final availableSkills = [
+      'Mathematics', 'Programming', 'Science', 'Languages', 'Music', 
+      'Art', 'Physics', 'Chemistry', 'Biology', 'English', 'Spanish',
+      'Java', 'Python', 'JavaScript', 'Flutter', 'React', 'Node.js',
+      'Writing', 'Literature', 'History', 'Geography', 'Economics'
+    ];
+    
+    final selectedSkills = List<String>.from(currentUser.teachingSkills);
+    bool isAvailable = currentUser.isAvailableAsTutor;
+
+    showDialog(
+      context: context,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: const Text('Edit Tutor Profile'),
+          content: Form(
+            key: formKey,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Availability Toggle
+                  SwitchListTile(
+                    title: const Text('Available for Tutoring'),
+                    subtitle: const Text('Toggle to show/hide your profile in tutor list'),
+                    value: isAvailable,
+                    onChanged: (value) {
+                      setDialogState(() {
+                        isAvailable = value;
+                      });
+                    },
+                  ),
+                  const Divider(),
+                  const SizedBox(height: 16),
+                  
+                  // Teaching Skills
+                  Text(
+                    'Skills You Teach',
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: availableSkills.map((skill) {
+                      final isSelected = selectedSkills.contains(skill);
+                      return FilterChip(
+                        label: Text(skill),
+                        selected: isSelected,
+                        onSelected: (selected) {
+                          setDialogState(() {
+                            if (selected) {
+                              selectedSkills.add(skill);
+                            } else {
+                              selectedSkills.remove(skill);
+                            }
+                          });
+                        },
+                        selectedColor: Theme.of(context).primaryColor.withValues(alpha: 0.2),
+                        checkmarkColor: Theme.of(context).primaryColor,
+                      );
+                    }).toList(),
+                  ),
+                  const SizedBox(height: 24),
+                  
+                  // Hourly Rate
+                  TextFormField(
+                    controller: rateController,
+                    decoration: const InputDecoration(
+                      labelText: 'Hourly Rate (USD)',
+                      prefixIcon: Icon(Icons.attach_money),
+                      border: OutlineInputBorder(),
+                    ),
+                    keyboardType: TextInputType.number,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter your hourly rate';
+                      }
+                      if (double.tryParse(value) == null) {
+                        return 'Please enter a valid number';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  
+                  // Description
+                  TextFormField(
+                    controller: descriptionController,
+                    decoration: const InputDecoration(
+                      labelText: 'Tutor Description',
+                      hintText: 'Describe your teaching experience and expertise...',
+                      prefixIcon: Icon(Icons.description),
+                      border: OutlineInputBorder(),
+                    ),
+                    maxLines: 3,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () async {
+                if (formKey.currentState!.validate()) {
+                  final userProvider = context.read<UserProvider>();
+                  
+                  // Update user with tutor info
+                  final success = await userProvider.updateProfile(
+                    teachingSkills: selectedSkills,
+                    hourlyRate: double.parse(rateController.text),
+                    tutorDescription: descriptionController.text,
+                    isAvailableAsTutor: isAvailable,
+                  );
+                  
+                  if (success && mounted) {
+                    Navigator.pop(dialogContext);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Tutor profile updated successfully!'),
+                        backgroundColor: Colors.green,
+                      ),
+                    );
+                  }
+                }
+              },
+              child: const Text('Save'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -468,6 +617,118 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         },
                       ),
                       const SizedBox(height: 32),
+
+                      // Tutor Profile Section (only for users who can teach)
+                      if (user.canTeach && !_isEditing) ...[
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: Theme.of(context).primaryColor.withValues(alpha: 0.3),
+                            ),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Icon(
+                                    Icons.school,
+                                    color: Theme.of(context).primaryColor,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    'Tutor Profile',
+                                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                      color: Theme.of(context).primaryColor,
+                                    ),
+                                  ),
+                                  const Spacer(),
+                                  if (user.isAvailableAsTutor)
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                      decoration: BoxDecoration(
+                                        color: Colors.green,
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: const Text(
+                                        'Available',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    )
+                                  else
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                      decoration: BoxDecoration(
+                                        color: Colors.grey,
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: const Text(
+                                        'Not Available',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                ],
+                              ),
+                              const SizedBox(height: 16),
+                              if (user.teachingSkills.isNotEmpty) ...[
+                                Text(
+                                  'Teaching:',
+                                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: Colors.grey[600],
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Wrap(
+                                  spacing: 8,
+                                  runSpacing: 8,
+                                  children: user.teachingSkills.map((skill) {
+                                    return Chip(
+                                      label: Text(skill),
+                                      backgroundColor: Theme.of(context).primaryColor.withValues(alpha: 0.2),
+                                      labelStyle: TextStyle(
+                                        color: Theme.of(context).primaryColor,
+                                      ),
+                                    );
+                                  }).toList(),
+                                ),
+                                const SizedBox(height: 12),
+                              ],
+                              if (user.hourlyRate != null)
+                                Text(
+                                  'Hourly Rate: \$${user.hourlyRate!.toStringAsFixed(2)}',
+                                  style: Theme.of(context).textTheme.bodyMedium,
+                                ),
+                              const SizedBox(height: 12),
+                              if (user.tutorDescription != null && user.tutorDescription!.isNotEmpty)
+                                Text(
+                                  user.tutorDescription!,
+                                  style: Theme.of(context).textTheme.bodyMedium,
+                                ),
+                              const SizedBox(height: 12),
+                              Center(
+                                child: TextButton.icon(
+                                  onPressed: () => _showTutorProfileDialog(context, user),
+                                  icon: const Icon(Icons.edit),
+                                  label: const Text('Edit Tutor Profile'),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 32),
+                      ],
 
                       // Account Actions
                       if (!_isEditing) ...[

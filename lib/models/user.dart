@@ -1,4 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
+import 'tutor.dart';
 
 part 'user.g.dart';
 
@@ -14,7 +15,15 @@ class User {
   final List<String> languages;
   final DateTime createdAt;
   final DateTime lastActive;
-  final String role; // 'student' or 'tutor'
+  final String role; // 'student', 'tutor', or 'both'
+  
+  // Tutor-specific fields (for users who are also tutors)
+  final List<String> teachingSkills;
+  final double? hourlyRate;
+  final String? tutorDescription;
+  final bool isAvailableAsTutor;
+  final double tutorRating;
+  final int tutorReviewCount;
 
   const User({
     required this.id,
@@ -28,6 +37,12 @@ class User {
     required this.createdAt,
     required this.lastActive,
     this.role = 'student',
+    this.teachingSkills = const [],
+    this.hourlyRate,
+    this.tutorDescription,
+    this.isAvailableAsTutor = false,
+    this.tutorRating = 0.0,
+    this.tutorReviewCount = 0,
   });
 
   factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
@@ -45,6 +60,12 @@ class User {
     DateTime? createdAt,
     DateTime? lastActive,
     String? role,
+    List<String>? teachingSkills,
+    double? hourlyRate,
+    String? tutorDescription,
+    bool? isAvailableAsTutor,
+    double? tutorRating,
+    int? tutorReviewCount,
   }) {
     return User(
       id: id ?? this.id,
@@ -58,8 +79,39 @@ class User {
       createdAt: createdAt ?? this.createdAt,
       lastActive: lastActive ?? this.lastActive,
       role: role ?? this.role,
+      teachingSkills: teachingSkills ?? this.teachingSkills,
+      hourlyRate: hourlyRate ?? this.hourlyRate,
+      tutorDescription: tutorDescription ?? this.tutorDescription,
+      isAvailableAsTutor: isAvailableAsTutor ?? this.isAvailableAsTutor,
+      tutorRating: tutorRating ?? this.tutorRating,
+      tutorReviewCount: tutorReviewCount ?? this.tutorReviewCount,
     );
   }
+
+  // Convert User to Tutor model (for displaying in tutor list)
+  Tutor toTutor() {
+    return Tutor(
+      id: id,
+      name: name,
+      email: email,
+      profileImage: profileImage,
+      skills: teachingSkills.isEmpty ? interests : teachingSkills,
+      rating: tutorRating,
+      reviewCount: tutorReviewCount,
+      description: tutorDescription ?? bio ?? 'Tutor specializing in ${teachingSkills.isEmpty ? interests.join(", ") : teachingSkills.join(", ")}',
+      hourlyRate: hourlyRate ?? 25.0,
+      isAvailable: isAvailableAsTutor,
+      location: location,
+      languages: languages,
+      createdAt: createdAt,
+    );
+  }
+
+  // Check if user can act as tutor
+  bool get canTeach => role == 'tutor' || role == 'both';
+  
+  // Check if user can act as student
+  bool get canLearn => role == 'student' || role == 'both';
 
   @override
   bool operator ==(Object other) {
