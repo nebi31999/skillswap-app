@@ -4,7 +4,8 @@ A comprehensive Flutter mobile application that connects students with peer tuto
 
 ## 🎥 App Demonstration
 
-Watch the complete app demonstration: [SkillSwap App Demo](https://www.loom.com/share/f5ec247ee96849b78edf18728a4c9530)
+app demonstration: [SkillSwap App Demo 1](https://www.loom.com/share/f5ec247ee96849b78edf18728a4c9530),
+[SkillSwap App Demo 2](https://www.loom.com/share/2347bb8be17441c49a473e721ae9e135)
 
 ## 📱 Features
 
